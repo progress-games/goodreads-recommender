@@ -1,5 +1,5 @@
-Round to:5:The amount of decimal points shows for each suggestion:The program gives you a percentage along with each recommended book which is an indicator of how similar it is to your book, this number determines how many decimal points should be rounded to for that percentage. 
-Suggestion amount:5:The amount of suggestions printed:When you receieve your suggested books, by default you will only recieve 5. Altering this numebr will increase/decrease how many books are shown to you
-Suggestion threshold:0:Any suggestions under this amount will not be shown:When you recieve your suggested books, they come with a number indicating similarity to your inputted book. If a books number happens to fall beneath this setting, we won't show it to you
-'Did you mean?' leniance:0:Suggests more books upon book name input:As this number increases, when searching the list of books, it will allow more books to be shown to you for you to pick which is yours
-Enabled 'Search Goodreads.com':False:Searches Goodreads at user request when a book is not on the database. Takes ages and it kinda sucks. More of a proof of concept: Disabled by default. Suggested against use on public networks. This will only work if selenium and beautifulsoup4 are downloaded and available on PATH
+Round to:5:The number rounding to on suggestions:For each suggestion, a number is generated, this will determine the amount of decimal points
+Enabled 'Search Goodreads.com':False:Disabled by default, likely won't work on your machine unless you have selenium and BS4:Searches the internet for your book if it isn't on the database
+'Did you mean?' leniance:0.8:Lowering this number will increase the amount of books that show up as a suggestion. Must be between 0 and 1:When you type in a book name, it generates a list of books that it thinks you mean
+Suggestion amount:5.0:The amount of books shown:"After generation, the amount of books shown"
+Suggestion threshold:0.0:Books below this number will not be displayed. Must be between 0 and 99:The percentage of the book determines it's similarity to your book.
