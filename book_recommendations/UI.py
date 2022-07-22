@@ -1,4 +1,6 @@
 import BookGenerator
+print('Next Favourite Book')
+print('Made by Orlando Scalzo')
 
 NewGenerator = BookGenerator.BookGenerator('main_data.csv')
 
@@ -22,7 +24,7 @@ while True:
             
             print('You might like: ')
 
-            for i in range(amount):
+            for i in range(int(amount)):
                 percentage = round(100 - suggestions[i][1]/book_sum*100, round_n)
                 if percentage > threshold:
                     print(f'{suggestions[i][0]} : {percentage}%')
