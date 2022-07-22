@@ -1,3 +1,6 @@
+from pydoc import doc
+
+
 class BookGenerator:
     def __init__(self, file_name):
         import csv
@@ -19,7 +22,7 @@ class BookGenerator:
         self.headers = [entry for entry in self.lines[0]]
         self.headers = self.headers[1:len(self.headers)]
 
-        self.keywords = {'help': 'Navigates to this menu', 'settings': 'Navigates to settings',
+        self.keywords = {'help': 'Navigates to this menu', 'settingsmenu': 'Navigates to settings',
         'quit': 'Exits the program', 'instructions': 'Brief explanation on how to use this program',
         'description': 'Brief description on how this program works'}
 
@@ -42,7 +45,7 @@ class BookGenerator:
                     if char != ':': setting[a] = setting[a] + char
                     else: a+=1
                 try:
-                    setting[1] = int(setting[1])
+                    setting[1] = float(setting[1])
                 except ValueError:
                     if setting[1] == 'True': setting[1] = True
                     else: setting[1] = False
@@ -51,6 +54,8 @@ class BookGenerator:
                 self.extended_descriptions[setting[0]] = setting[3].replace('\n', '')
         
     def keyword_router(self, area):
+
+        #route the input to the relevant definition
         for keyword, _ in self.keywords.items():
             if self.similar(area, keyword, 0.5):
                 self.__getattribute__(keyword)()
@@ -66,14 +71,99 @@ class BookGenerator:
         if ans != '':
             self.keyword_router(ans)
 
-    def settings(self):
-        print('This is the settings menu')
-    
+    def updatesettings(self):
+        import csv
+
+        #writes the new settings
+        with open('book_recommendations/settings.txt', 'w', newline='') as f:
+            writer = csv.writer(f)
+            for k, v in self.settings.items():
+                row = []
+                row.append(k + ':')
+                row.append((str(v) + ':').replace(',',''))
+                row.append((self.descriptions[k] + ':').replace(',', ''))
+                row.append(self.extended_descriptions[k])
+                writer.writerow(row)
+                
+    def settingsmenu(self):
+
+        #reads the text file. getting name/desc/ex_desc
+        with open('book_recommendations/settings.txt', 'r') as f:
+            content = f.readlines()
+            self.settings = {}
+            self.descriptions = {}
+            self.extended_descriptions = {}
+            for k, v in enumerate(content):
+                setting = ['', '', '', '']
+                a = 0
+                for char in v:
+                    if char != ':': setting[a] = setting[a] + char
+                    else: a+=1
+                try:
+                    setting[1] = float(setting[1])
+                except ValueError:
+                    if setting[1] == 'True': setting[1] = True
+                    else: setting[1] = False
+                self.settings[setting[0]] = setting[1]
+                self.descriptions[setting[0]] = setting[2].replace('\n', '')
+                self.extended_descriptions[setting[0]] = setting[3].replace('\n', '')
+
+        a = 1
+        settings = []
+        #print list
+        for k, v in self.settings.items():
+            print(f'{a}. {k}: {v}')
+            print(self.descriptions[k])
+            a = a + 1
+            settings.append(k)
+
+        while True:
+            try:
+                ans = int(input('Which setting would you like to edit? '))
+                break
+            except ValueError:
+                print('That is not a number')
+        
+        #pretty ugly set out but at least it's legible
+        selection = settings[ans - 1]
+        print(f'\n\nEditing {selection}')
+        print(f'This is currently set to {self.settings[selection]}') 
+        print(f'Desc: {self.descriptions[selection]}\nExtended Desc: {self.extended_descriptions[selection]}')
+
+        change = input('What would you like to change this to? ')
+
+        #lets all non float be a boolean
+        while True:
+            if change.lower() != 'true' and change.lower() != 'false':
+                try:
+                    self.settings[selection] = float(change)
+                    break
+                except ValueError:
+                    print('That is not a number')
+            else:
+                if change.lower() == 'false':
+                    self.settings[selection] = False
+                    break
+                elif change.lower() == 'true':
+                    self.settings[selection] = True
+                    break
+                else:
+                    print('Not a valid input')
+        
+        print('Updating file...')
+        self.updatesettings()
+        
+        ans = input('Press enter to exit the settings menu, type anything to continue: ')
+        if ans != '':
+            self.settingsmenu()
+
     def quit(self):
-        print('This is the quitting menu')
+        #probably a more elegant solution, but this makes sure it just stops everything
+        raise Exception('User choice')
     
     def instructions(self):
-        print('This is the instructions menu')
+        print('Enter a book name at the prompt, select your chosen book.  \nThen, it will generate a list of recommendations for you.')
+        self.help()
 
     def description(self):
         from time import sleep
@@ -104,6 +194,7 @@ class BookGenerator:
         self.help()
 
     def similar(self, a, b, allowance):
+        #documentation on difflib: https://docs.python.org/3/library/difflib.html
         from difflib import SequenceMatcher
         return SequenceMatcher(None, a, b).ratio() > allowance
 
@@ -135,7 +226,7 @@ class BookGenerator:
                 self.data[row[0]] = [float(num) for num in self.data[row[0]][1:len(self.data[row[0]])]]
 
     def get_book(self, book_name):
-        from time import sleep
+        #most of this is reusing code from the data collection process
 
         print('\n--DO NOT INTERACT WITH THE BROWSER--')
 
@@ -251,7 +342,7 @@ class BookGenerator:
     
     def find_book_name(self, book_name):
         suggested = []
-        a = 0.8
+        a = self.settings["'Did you mean?' leniance"]
 
         #find at least one similar book by lowing the allowed threshold
         while len(suggested) == 0:
